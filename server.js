@@ -1,52 +1,9 @@
-const http = require("http");
+module.exports = async (req, res) => {
+  // Page d'accueil
+  if (req.url === "/" || req.url === "") {
+    res.setHeader("Content-Type", "text/html; charset=utf-8");
 
-const server = http.createServer(async (req, res) => {
-  // API : /api/redirect?url=...
-  if (req.url.startsWith("/api/redirect")) {
-    const requestUrl = new URL(req.url, "http://localhost");
-    const target = requestUrl.searchParams.get("url");
-
-    res.setHeader("Content-Type", "application/json");
-
-    if (!target) {
-      res.statusCode = 400;
-      res.end(JSON.stringify({
-        error: "URL manquante"
-      }));
-      return;
-    }
-
-    try {
-      const response = await fetch(target, {
-        redirect: "follow"
-      });
-
-      res.statusCode = 200;
-
-      res.end(JSON.stringify({
-        success: true,
-        originalUrl: target,
-        finalUrl: response.url,
-        status: response.status
-      }));
-
-    } catch (error) {
-      res.statusCode = 500;
-
-      res.end(JSON.stringify({
-        success: false,
-        error: error.message
-      }));
-    }
-
-    return;
-  }
-
-  // Page principale
-  res.statusCode = 200;
-  res.setHeader("Content-Type", "text/html; charset=utf-8");
-
-  res.end(`
+    return res.end(`
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -97,67 +54,101 @@ const server = http.createServer(async (req, res) => {
 
   <div id="result"></div>
 
-  <script>
-    async function checkUrl() {
-      const input = document.getElementById("url");
-      const result = document.getElementById("result");
+<script>
+async function checkUrl() {
 
-      const url = input.value.trim();
+  const url = document.getElementById("url").value.trim();
+  const result = document.getElementById("result");
 
-      if (!url) {
-        result.innerHTML = "<p>Entre une URL.</p>";
-        return;
-      }
+  if (!url) {
+    result.innerHTML = "Entre une URL.";
+    return;
+  }
 
-      result.innerHTML = "<p>Recherche...</p>";
+  result.innerHTML = "Recherche...";
 
-      try {
-        const response = await fetch(
-          "/api/redirect?url=" + encodeURIComponent(url)
-        );
+  try {
 
-        const data = await response.json();
+    const response = await fetch(
+      "/api?url=" + encodeURIComponent(url)
+    );
 
-        if (!response.ok || !data.success) {
-          throw new Error(data.error || "Erreur");
-        }
+    const data = await response.json();
 
-        result.innerHTML = \`
-          <p><strong>URL originale :</strong></p>
-          <p>\${escapeHtml(data.originalUrl)}</p>
-
-          <p><strong>URL finale :</strong></p>
-          <p>
-            <a
-              href="\${escapeHtml(data.finalUrl)}"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              \${escapeHtml(data.finalUrl)}
-            </a>
-          </p>
-
-          <p><strong>Status :</strong> \${data.status}</p>
-        `;
-
-      } catch (error) {
-        result.innerHTML =
-          "<p style='color:red'>Erreur : " +
-          escapeHtml(error.message) +
-          "</p>";
-      }
+    if (!response.ok) {
+      throw new Error(data.error || "Erreur");
     }
 
-    function escapeHtml(text) {
-      const div = document.createElement("div");
-      div.textContent = text;
-      return div.innerHTML;
-    }
-  </script>
+    result.innerHTML =
+      "<b>URL finale :</b><br><br>" +
+      data.finalUrl;
+
+  } catch (error) {
+
+    result.innerHTML =
+      "<span style='color:red'>" +
+      error.message +
+      "</span>";
+
+  }
+}
+</script>
 
 </body>
 </html>
-  `);
-});
+    `);
+  }
 
-module.exports = server;
+  // Récupération de l'URL
+  const requestUrl = new URL(
+    req.url,
+    "https://example.com"
+  );
+
+  const target = requestUrl.searchParams.get("url");
+
+  res.setHeader("Content-Type", "application/json");
+
+  if (!target) {
+    res.statusCode = 400;
+
+    return res.end(JSON.stringify({
+      error: "URL manquante"
+    }));
+  }
+
+  try {
+
+    const parsed = new URL(target);
+
+    if (
+      parsed.protocol !== "http:" &&
+      parsed.protocol !== "https:"
+    ) {
+      throw new Error("Seules les URLs HTTP/HTTPS sont autorisées");
+    }
+
+    const response = await fetch(parsed.href, {
+      redirect: "follow",
+      headers: {
+        "User-Agent": "Mozilla/5.0"
+      }
+    });
+
+    return res.end(JSON.stringify({
+      success: true,
+      originalUrl: target,
+      finalUrl: response.url,
+      status: response.status
+    }));
+
+  } catch (error) {
+
+    res.statusCode = 500;
+
+    return res.end(JSON.stringify({
+      success: false,
+      error: error.message
+    }));
+  }
+};
