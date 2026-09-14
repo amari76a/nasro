@@ -3,7 +3,7 @@ const http = require("http");
 const server = http.createServer(async (req, res) => {
   // API : /api/redirect?url=...
   if (req.url.startsWith("/api/redirect")) {
-    const requestUrl = new URL(req.url, "https://zemn.vercel.app/");
+    const requestUrl = new URL(req.url, "http://localhost");
     const target = requestUrl.searchParams.get("url");
 
     res.setHeader("Content-Type", "application/json");
