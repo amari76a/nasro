@@ -1,12 +1,12 @@
 {
-  "name": "selfie2027-api",
+  "name": "nasro",
   "version": "1.0.0",
-  "type": "module",
-  "dependencies": {
-    "mongodb": "^6.3.0"
+  "private": true,
+  "scripts": {
+    "dev": "node server.js",
+    "start": "node server.js"
   },
-  "scripts":{
-    "test":"hi",
-    "start":"node server"
+  "engines": {
+    "node": ">=18"
   }
 }
