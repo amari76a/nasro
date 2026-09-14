@@ -1,8 +1,15 @@
 {
-
-  "env": {
-    "MONGODB_URI": "mongodb+srv://neroman95:nasro@mydata.q2wwfhj.mongodb.net/tokensDB?retryWrites=true&w=majority",
-    "ADMIN_SECRET": "nasro"
-   
-  }
+  "version": 2,
+  "builds": [
+    {
+      "src": "server.js",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "server.js"
+    }
+  ]
 }
