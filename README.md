@@ -1,2 +1,0 @@
-# nasro
-nasrotest
