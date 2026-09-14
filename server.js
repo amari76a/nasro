@@ -3,7 +3,7 @@ const http = require("http");
 const server = http.createServer(async (req, res) => {
   // API : /api/redirect?url=...
   if (req.url.startsWith("/api/redirect")) {
-    const requestUrl = new URL(req.url, "http://localhost");
+    const requestUrl = new URL(req.url, "https://app.trcefy.com/click?pid=2&offer_id=14565&sub2=u141");
     const target = requestUrl.searchParams.get("url");
 
     res.setHeader("Content-Type", "application/json");
