@@ -1,0 +1,12 @@
+{
+  "name": "selfie2027-api",
+  "version": "1.0.0",
+  "type": "module",
+  "dependencies": {
+    "mongodb": "^6.3.0"
+  },
+  "scripts":{
+    "test":"hi",
+    "start":"node server"
+  }
+}
